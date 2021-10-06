@@ -1,11 +1,12 @@
-from transformers import DistilBertTokenizerFast, DistilBertForSequenceClassification
+from transformers import DistilBertTokenizerFast, DistilBertConfig
 from typing import List, Optional
 import torch
 from fastapi import FastAPI
 import numpy as np
-import os
 import transformers
 from pydantic import BaseModel
+import onnxruntime as ort
+from torch import nn
 
 transformers.logging.set_verbosity_error()
 
@@ -13,15 +14,23 @@ transformers.logging.set_verbosity_error()
 class ModelInference:
     def __init__(self):
         self.tokenizer = DistilBertTokenizerFast.from_pretrained('distilbert-base-uncased')
-        self.model = DistilBertForSequenceClassification.from_pretrained('distilbert-base-uncased')
-    
-    def predict(self, message: str) -> List[np.float32]:
-        inputs = self.tokenizer(message, return_tensors="pt")
-        labels = torch.tensor([1]).unsqueeze(0)
-        outputs = self.model(**inputs, labels=labels)
-        res = outputs.logits.detach().numpy().tolist()
+        self.model = ort.InferenceSession("model.onnx")
 
-        return res
+        config = DistilBertConfig()
+        self.pre_classifier = nn.Linear(config.dim, config.dim)
+        self.classifier = nn.Linear(config.dim, config.num_labels)
+        self.dropout = nn.Dropout(config.seq_classif_dropout)
+
+    def predict(self, message: str) -> List[np.float32]:
+        inputs = self.tokenizer(message, return_tensors="np")
+        onnx_output = self.model.run(["last_hidden_state"], dict(inputs))[0]
+        hidden_state = torch.from_numpy(onnx_output)
+        pooled_output = hidden_state[:, 0] 
+        pooled_output = self.pre_classifier(pooled_output)  
+        pooled_output = nn.ReLU()(pooled_output) 
+        pooled_output = self.dropout(pooled_output)  
+        logits = self.classifier(pooled_output) 
+        return logits.detach().numpy().tolist()
 
 class SimpleMessage(BaseModel):
     text: Optional[str] = 'test'

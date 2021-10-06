@@ -19,4 +19,10 @@ Doing 10 runs, on average takes around 9 seconds
 
 Version 2 involves switching to lightweight versions of torch (using torch cpu), as well as using a slimmer version of python. This brings the image size down to 1.12GB, and starting the container up to 1.56GB.
 
-The same docker commands from before are used, just switched out. 
+The same docker commands from before are used, just switched out to use `v2`. 
+
+## Version 3
+
+Version 3 introduces some new enhancements made by switching to a model using distillation, i.e. in this case [DistilBERT](!https://arxiv.org/abs/1910.01108), which is 40% smaller. In addition, we can use onnx quantization to help reduce model size
+
+* Note - something that potentially could be done to help shrink the size is to actually go into torch and start pruning tests. Yes, prune some tests - turns out a good chunk of the pytorch size comes from test modules! Obviously very dangerous, but we could shrink ~ 30% of the torch download size on disk. We would need some place to zip up and package the environment manually, vs downloading everything via `pip` in the dockerfile.
