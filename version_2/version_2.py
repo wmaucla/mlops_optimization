@@ -19,6 +19,7 @@ class ModelInference:
         inputs = self.tokenizer(message, return_tensors="pt")
         labels = torch.tensor([1]).unsqueeze(0)
         outputs = self.model(**inputs, labels=labels)
+        print(outputs)
         res = outputs.logits.detach().numpy().tolist()
 
         return res

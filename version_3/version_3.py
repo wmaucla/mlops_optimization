@@ -14,7 +14,7 @@ transformers.logging.set_verbosity_error()
 class ModelInference:
     def __init__(self):
         self.tokenizer = DistilBertTokenizerFast.from_pretrained('distilbert-base-uncased')
-        self.model = ort.InferenceSession("model.onnx")
+        self.model = ort.InferenceSession("onnx/distilbert-base-cased/model.onnx")
 
         config = DistilBertConfig()
         self.pre_classifier = nn.Linear(config.dim, config.dim)
