@@ -11,10 +11,9 @@ Docker commands:
 1. `docker build -t v1 version_1/` 
 2. `docker image ls` 
 3. `docker system df -v`
+4. `docker container ls -s`
 
 We can see here then that the image is 3.78GB, NOT including downloading the model. After starting the container, that goes up to 4.22GB (since you have to download BERT from transformers).
-
-Doing 10 runs, on average takes around 9 seconds
 
 ## Version 2 - Better Software Practices
 
@@ -24,9 +23,19 @@ The same docker commands from before are used, just switched out to use `v2`.
 
 ## Version 3
 
-Version 3 introduces some new enhancements made by switching to a model using distillation, i.e. in this case [DistilBERT](!https://arxiv.org/abs/1910.01108), which is 40% smaller. In addition, we can use onnx to help reduce model size. The image itself becomes larger, at 1.72GB, however that is due to the fact that we now have both the original distilbert model + the quantized version. In the next version
+Version 3 introduces some new enhancements made by switching to a model using distillation, i.e. in this case [DistilBERT](!https://arxiv.org/abs/1910.01108), which is 40% smaller. In addition, we can use onnx to help reduce model size. The image itself becomes larger, at 1.72GB, however that is due to the fact that we now have both the original distilbert model + the onnx version. 
+
+## Version 4
+
+In this version, the Docker image shrinks by doing a multi-step build and only copying over the relevant items needed (as well as copying the tokenizer locally, so as to save time on container start). Now we're down to 1.25GB for the image size, and on container start, the size is still the same.
 
 
+| Version  | Image Size | Container Size    |
+| :---     |    :----:   |          ---: |
+| V1   | 3.783GB        |   4.22GB    |
+| V2   | 1.051GB        |  1.61GB     |
+| V3   | 1.602GB        |  1.72GB     |
+| V4   | 1.125GB        |  1.125GB     |
 
 ## ToDOS
 

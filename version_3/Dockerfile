@@ -3,7 +3,7 @@ FROM python:3.8-slim-bullseye
 WORKDIR /app
 
 COPY requirements.txt requirements.txt
-RUN pip install --user -r requirements.txt
+RUN pip install -r requirements.txt
 
 RUN python -m transformers.onnx --model=distilbert-base-cased onnx/distilbert-base-cased/
 
