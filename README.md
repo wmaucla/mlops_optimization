@@ -21,21 +21,23 @@ Version 2 involves switching to lightweight versions of torch (using torch cpu),
 
 The same docker commands from before are used, just switched out to use `v2`. 
 
-## Version 3
+## Version 3 - Distillation and Onnx
 
 Version 3 introduces some new enhancements made by switching to a model using distillation, i.e. in this case [DistilBERT](!https://arxiv.org/abs/1910.01108), which is 40% smaller. In addition, we can use onnx to help reduce model size. The image itself becomes larger, at 1.72GB, however that is due to the fact that we now have both the original distilbert model + the onnx version. 
 
-## Version 4
+## Version 4 - Multistage Docker Builds
 
 In this version, the Docker image shrinks by doing a multi-step build and only copying over the relevant items needed (as well as copying the tokenizer locally, so as to save time on container start). Now we're down to 1.25GB for the image size, and on container start, the size is still the same.
 
 
 | Version  | Image Size | Container Size    |
 | :---     |    :----:   |          ---: |
-| V1   | 3.783GB        |   4.22GB    |
-| V2   | 1.051GB        |  1.61GB     |
+| V1*  | 3.783GB        |   4.22GB    |
+| V2*   | 1.051GB        |  1.61GB     |
 | V3   | 1.602GB        |  1.72GB     |
 | V4   | 1.125GB        |  1.125GB     |
+
+*Note for V1 and V2, the model isn't downloaded yet (will be done at container start time), which is why you see the gap
 
 ## ToDOS
 
